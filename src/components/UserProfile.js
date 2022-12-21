@@ -1,10 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import "./UserProfile.css"
-function UserProfile({name,photoURL}) {
+function UserProfile({name,photoURL,email}) {
+   
+  const navigate = useNavigate()
+  
+  
+  const goToUser = (emailId) => {
+    if (emailId) {
+      navigate(`/${emailId}`);
+    }
+  };
+
+  
+ 
   return (
-    <div className='user-profile'>
+    <div className='user-profile' onClick={() => goToUser(email)}>
       
-      <div className='user-image'>
+      <div className='user-image' >
         <img src={photoURL}></img>
       </div>
 

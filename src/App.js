@@ -26,26 +26,18 @@ function App() {
   }
 
   return (
-
-
       <Router>
-        
         <div className="App">
-        
         {
           user ? (
            <Routes>
   
-          <Route path='/chatpage' element={<ChatPage currentUser = {user} signOut = {signOut}/>} />
-          <Route path='/' element={<Home currentUser = {user}  signOut = {signOut}/>} />
-
+          <Route path='/:emailID' 
+          element={<ChatPage currentUser = {user} signOut = {signOut}/>} />
+          <Route path='/' 
+          element={<Home currentUser = {user}  signOut = {signOut}/>} />
         </Routes> ) : <Login setUser={setUser}/>
-
         }
-        
-         
-        
-  
         </div> 
 
        

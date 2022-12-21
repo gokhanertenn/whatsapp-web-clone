@@ -39,12 +39,13 @@ function SideBar({currentUser,signOut}) {
         user.data().fullname.toLowerCase().includes(searchInput.
           toLowerCase())
         ) {
-          return user ;
+          console.log(user.data().fullname)
+          return user
       }
     }})
 
 
-    const searchItem = searchInput.map((user) => {
+    const searchItem = searchedInput.map((user) => {
       
       return (
 
@@ -52,6 +53,8 @@ function SideBar({currentUser,signOut}) {
         
         name = {user.data().fullname}
         photoURL = {user.data().photoURL}
+        key = {user.id}
+        email ={user.data().email}
         />
 
            
@@ -94,10 +97,15 @@ function SideBar({currentUser,signOut}) {
          </div>
       <div className='sidebar-chat-list'>
              
+             {
+              searchItem.length > 0 ? (
+              searchItem) :
+
+              (<UserProfile name="Oğuz Arslan" photoURL="./user.png" />
+              )
+             }
              
-             <UserProfile name="Oğuz Arslan" photoURL="./user.png" />
-             <UserProfile name="Berke Kartal" photoURL="./user.png"/>
-             <UserProfile name="Orkun Yetkin" photoURL="./user.png"/>
+             
    
       </div>
 
