@@ -51,7 +51,7 @@ function SideBar({currentUser,signOut}) {
         <UserProfile
         
         name = {user.data().fullname}
-        
+        photoURL = {user.data().photoURL}
         />
 
            
