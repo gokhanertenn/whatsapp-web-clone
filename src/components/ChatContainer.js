@@ -3,13 +3,14 @@ import InsertEmoticonButton from "@mui/icons-material/InsertEmoticon"
 import AttachFileIcon from "@mui/icons-material/AttachFile"
 import SendIcon from "@mui/icons-material/Send"
 import Picker from "emoji-picker-react"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import "./ChatContainer.css"
 import ChatMessage from './ChatMessage';
 import { useParams } from 'react-router-dom';
 import db from '../firebase';
+import firebase from 'firebase';
 
-function ChatContainer({name,photoURL}) {
+function ChatContainer({currentUser}) {
 
   const [message, setMessage] = useState("")
 
@@ -18,6 +19,10 @@ function ChatContainer({name,photoURL}) {
    const {emailID} = useParams()
   
  const [chatUser,setChatUser] = useState({})
+
+ const [chatMessages,setChatMessages] = useState([])
+
+ const chatBox = useRef(null)
 
    useEffect(()=> {
 
@@ -30,12 +35,99 @@ function ChatContainer({name,photoURL}) {
     })
 
    }
+     
+   const getMessages = async () => {
+    const data = await db
+      .collection("chats")
+      .doc(emailID)
+      .collection("messages")
+      .orderBy("timeStamp", "asc")
+      .onSnapshot((snapshot) => {
+        let messages = snapshot.docs.map((doc) => doc.data());
+
+        let newMessage = messages.filter(
+          (message) =>
+            message.senderEmail === (currentUser.email || emailID) ||
+            message.receiverEmail === (currentUser.email || emailID)
+        );
+
+        setChatMessages(newMessage);
+      });
+  };
+  getUser();
+  getMessages();
+},[emailID]);
+
+useEffect(() => {
+  chatBox.current.addEventListener("DOMNodeInserted", (event) => {
+    const { currentTarget: target } = event;
+    target.scroll({ top: target.scrollHeight, behavior: "smooth" });
+  });
+}, [chatMessages]);
+
+
+
+  
    
-   getUser();
-   },[])
+
+   const send = (e) => {
+
+     e.preventDefault();
+
+     if(emailID) {
+     let payload = {
+      text:message,
+      senderEmail : currentUser.email,
+      receiverEmail : emailID,
+      timeStamp : firebase.firestore.Timestamp.now()
+     }
+     db.collection("chats")
+     .doc(currentUser.email)
+     .collection('messages')
+     .add(payload)
+
+
+     db.collection("chats")
+     .doc(emailID)
+     .collection('messages')
+     .add(payload)
+
+     db.collection("Friendlist")
+     .doc(currentUser.email)
+     .collection('list')
+     .doc(emailID)
+     .set(
+       {
+        email:currentUser.email,
+        fullname:chatUser.fullname,
+        photoURL:chatUser.photoURL,
+        lastMessage:message
+       }
+     )
+
+     db.collection("Friendlist")
+     .doc(emailID)
+     .collection('list')
+     .doc(currentUser.email)
+     .set(
+       {
+        email:currentUser.email,
+        fullname:currentUser.fullname,
+        photoURL:currentUser.photoURL,
+        lastMessage:message
+       }
+     )
+   
+     setMessage("")
+
+     }
+
+
+
+   }
 
   return (
-    <div className='chat-container'>
+    <div className='chat-container' >
       <div className='chat-container-header'>
         <div className='chat-user-info'>
           <div className='chat-user-img'>
@@ -47,10 +139,17 @@ function ChatContainer({name,photoURL}) {
           <MoreVertIcon />
         </div>
       </div>
-      <div className='chat-display-container'>
-        <ChatMessage message="Nasılsın" date="22-04-2022" />
-        <ChatMessage message="Nasılsın" date="22-04-2022" />
-        <ChatMessage message="Nasılsın" date="22-04-2022" />
+      <div className='chat-display-container' ref = {chatBox}>
+      
+       
+
+      {chatMessages.map((message) => (
+          <ChatMessage
+            message={message.text}
+            time={message.timeStamp}
+            sender={message.senderEmail}
+          />
+        ))}
       </div>
       {openEmojiPicker && <Picker 
       onEmojiClick={(emojiObject,event) => {
@@ -68,7 +167,7 @@ function ChatContainer({name,photoURL}) {
           <AttachFileIcon />
         </div>
 
-        <form>
+        <form onSubmit={send}>
           <input
             type="text"
             placeholder='Lütfen mesajınızı giriniz'
@@ -81,7 +180,7 @@ function ChatContainer({name,photoURL}) {
 
           </input>
         </form>
-        <div className='chat-input-bt'>
+        <div className='chat-input-btn' onClick={send}>
 
           <SendIcon />
         </div>

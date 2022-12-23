@@ -10,7 +10,7 @@ function ChatPage({currentUser,signOut}) {
         <div className='chatpage-container'>
 
         <SideBar currentUser={currentUser} signOut = {signOut}/>
-        <ChatContainer/>
+        <ChatContainer currentUser = {currentUser}/>
 
         </div>
         

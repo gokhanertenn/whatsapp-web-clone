@@ -6,12 +6,24 @@ import SearchIcon from '@mui/icons-material/Search';
 import "./Sidebar.css"
 import UserProfile from './UserProfile';
 import db from "../firebase"
+import { useNavigate } from 'react-router-dom';
 
-function SideBar({currentUser,signOut}) {
+function SideBar({currentUser,signOut,email}) {
   
   const [allUsers,setAllUsers] = useState([]);
 
-  const [searchInput,setSearchInput] = useState("")
+  const [searchInput,setSearchInput] = useState("");
+
+  const [friendsList,setFriendsList] = useState([]);
+
+
+  const navigate = useNavigate()
+
+  const goToUser = (emailId) => {
+    if (emailId) {
+      navigate(`/${emailId}`);
+    }
+  };
   
   
   useEffect(() => {
@@ -26,7 +38,19 @@ function SideBar({currentUser,signOut}) {
 
     }
     
+    const getFriends = async () => {
+      const data = await db
+        .collection("Friendlist")
+        .doc(currentUser.email)
+        .collection("list")
+        .onSnapshot((snapshot) => {
+          setFriendsList(snapshot.docs);
+        });
+    };
 
+
+
+      getFriends()
      getAllUsers();
      console.log("users >>>" , allUsers)
   },[])
@@ -55,6 +79,7 @@ function SideBar({currentUser,signOut}) {
         photoURL = {user.data().photoURL}
         key = {user.id}
         email ={user.data().email}
+        
         />
 
            
@@ -95,15 +120,23 @@ function SideBar({currentUser,signOut}) {
             ></input>
            </div>
          </div>
-      <div className='sidebar-chat-list'>
+      <div className='sidebar-chat-list'
+      
+      >
              
-             {
-              searchItem.length > 0 ? (
-              searchItem) :
+             {searchItem.length > 0 ? 
+              searchItem : 
+               friendsList.map((friend) => (
 
-              (<UserProfile name="Oğuz Arslan" photoURL="./user.png" />
-              )
-             }
+               <UserProfile 
+               name = {friend.data().fullname}
+               photoURL = {friend.data().photoURL}
+               lastMessage = {friend.data().lastMessage}
+               
+               /> 
+
+
+              ))}
              
              
    

@@ -1,4 +1,4 @@
-.chat-container {
+ .chat-container {
     min-width: 348px;
     flex: 1;
     display: flex;
@@ -89,10 +89,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #128c7e;
   }
   
   .chat-input-send-btn > .MuiSvgIcon-root {
     font-size: 22px;
+    background-color: #128c7e;
   }
  
